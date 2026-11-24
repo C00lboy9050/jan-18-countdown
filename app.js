@@ -1,12 +1,79 @@
 (() => {
-const target=Date.parse("2028-01-17T22:00:00Z"),ids=["days","hours","minutes","seconds"];
-function tick(){let d=Math.max(0,target-Date.now());const v=[Math.floor(d/86400000),Math.floor(d/3600000)%24,Math.floor(d/60000)%60,Math.floor(d/1000)%60];ids.forEach((id,i)=>{const e=document.getElementById(id);if(e)e.textContent=String(v[i]).padStart(i===0?3:2,"0")});if(d===0){const t=document.getElementById("eventTitle");if(t)t.textContent="THE DAY IS HERE"}}
-tick();setInterval(tick,1000);
-const audio=document.getElementById("backgroundMusic"),toggle=document.getElementById("musicToggle"),volume=document.getElementById("musicVolume");
-if(audio){audio.volume=volume?Number(volume.value):.35;if(toggle)toggle.addEventListener("click",async()=>{if(audio.paused){try{await audio.play();toggle.textContent="Ⅱ Pause Music"}catch{toggle.textContent="Tap to Play Music"}}else{audio.pause();toggle.textContent="▶ Play Music"}});if(volume)volume.addEventListener("input",()=>audio.volume=Number(volume.value));audio.addEventListener("play",()=>{if(toggle)toggle.textContent="Ⅱ Pause Music"});audio.addEventListener("pause",()=>{if(toggle)toggle.textContent="▶ Play Music"})}
-const form=document.getElementById("settingsForm"),input=document.getElementById("ytUrl"),key="jan18-youtube-video";
-function videoId(x){x=(x||"").trim();if(/^[\\w-]{11}$/.test(x))return x;try{const u=new URL(x);if(u.hostname.endsWith("youtu.be"))return u.pathname.slice(1).split("/")[0];if(u.searchParams.get("v"))return u.searchParams.get("v");const m=u.pathname.match(/\\/(?:live|embed|shorts)\\/([\\w-]{11})/);return m?m[1]:null}catch{return null}}
-const saved=localStorage.getItem(key);if(input&&saved)input.value=saved;
-if(form)form.addEventListener("submit",e=>{e.preventDefault();const id=videoId(input.value),msg=document.getElementById("saveMessage");if(!id){msg.textContent="That doesn't look like a YouTube video URL or ID.";return}localStorage.setItem(key,id);msg.textContent="Saved. Watch Live will use this video."});
-const player=document.getElementById("ytPlayer"),placeholder=document.getElementById("playerPlaceholder");if(player){const id=localStorage.getItem(key);if(id){player.src="https://www.youtube-nocookie.com/embed/"+encodeURIComponent(id);player.hidden=false;placeholder.hidden=true}}
+  const target = Date.parse("2028-01-17T22:00:00Z");
+  const ids = ["days", "hours", "minutes", "seconds"];
+
+  function tick() {
+    const remaining = Math.max(0, target - Date.now());
+    const values = [
+      Math.floor(remaining / 86400000),
+      Math.floor(remaining / 3600000) % 24,
+      Math.floor(remaining / 60000) % 60,
+      Math.floor(remaining / 1000) % 60
+    ];
+
+    ids.forEach((id, i) => {
+      const element = document.getElementById(id);
+      if (element) {
+        element.textContent = String(values[i]).padStart(i === 0 ? 3 : 2, "0");
+      }
+    });
+
+    if (remaining === 0) {
+      const title = document.getElementById("eventTitle");
+      if (title) title.textContent = "THE DAY IS HERE";
+    }
+  }
+
+  tick();
+  setInterval(tick, 1000);
+
+  const form = document.getElementById("settingsForm");
+  const input = document.getElementById("ytUrl");
+  const storageKey = "jan18-youtube-video";
+
+  function videoId(value) {
+    value = (value || "").trim();
+    if (/^[\w-]{11}$/.test(value)) return value;
+
+    try {
+      const url = new URL(value);
+      if (url.hostname.endsWith("youtu.be")) return url.pathname.slice(1).split("/")[0];
+      if (url.searchParams.get("v")) return url.searchParams.get("v");
+      const match = url.pathname.match(/\/(?:live|embed|shorts)\/([\w-]{11})/);
+      return match ? match[1] : null;
+    } catch {
+      return null;
+    }
+  }
+
+  const saved = localStorage.getItem(storageKey);
+  if (input && saved) input.value = saved;
+
+  if (form) {
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+      const id = videoId(input.value);
+      const message = document.getElementById("saveMessage");
+
+      if (!id) {
+        message.textContent = "That doesn't look like a YouTube video URL or ID.";
+        return;
+      }
+
+      localStorage.setItem(storageKey, id);
+      message.textContent = "Saved. Watch Live will use this video.";
+    });
+  }
+
+  const player = document.getElementById("ytPlayer");
+  const placeholder = document.getElementById("playerPlaceholder");
+
+  if (player) {
+    const id = localStorage.getItem(storageKey);
+    if (id) {
+      player.src = "https://www.youtube-nocookie.com/embed/" + encodeURIComponent(id);
+      player.hidden = false;
+      if (placeholder) placeholder.hidden = true;
+    }
+  }
 })();
